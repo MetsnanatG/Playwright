@@ -9,7 +9,15 @@ export class LoginPage {
   }
 
   async goto() {
-    await this.page.goto(process.env.BASE_URL,{timeout:60000});
+     await this.page.goto(process.env.BASE_URL,{timeout:60000});
+    // Explicitly sign out if a session is active
+      const signOutLink = this.page.getByRole('link', { name: /Sign Out/i });
+    if (await signOutLink.isVisible()) {
+      await signOutLink.click();
+      await this.page.waitForLoadState('networkidle');
+      console.log('✅ Explicit Sign Out performed');
+    }
+
     await this.page.waitForLoadState('domcontentloaded' ,{ timeout: 60000 });
   }
 

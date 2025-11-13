@@ -2,7 +2,10 @@
   "name": "pl",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "codegen": "playwright codegen https://keycloak.bp.bss.blueprint.lab/auth/realms/safaricom/account/applications --ignore-https-errors"
+
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
