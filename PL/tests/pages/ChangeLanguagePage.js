@@ -11,21 +11,40 @@ export default class ChangeLanguagePage {
   }
 
   async getCurrentLanguage() {
-    await this.detailsLink.waitFor({ state: 'visible', timeout: 10000 });
-    await this.detailsLink.click();
+  await this.detailsLink.waitFor({ state: 'visible', timeout: 10000 });
+  await this.detailsLink.click();
 
-    await this.updateLanguageLink.waitFor({ state: 'visible', timeout: 10000 });
-    await this.updateLanguageLink.click();
+  // Retry visibility check manually for flaky updateLanguageLink
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const isVisible = await this.updateLanguageLink.isVisible();
+      if (!isVisible) throw new Error('Not visible yet');
 
-    const langElement = this.page.locator('span.text-dots.float-left', {
-      hasText: /Amharic|English/
-    }).first();
+      const box = await this.updateLanguageLink.boundingBox();
+      if (!box) throw new Error('Not interactable');
 
-    await langElement.waitFor({ state: 'visible', timeout: 10000 });
-    const currentLang = (await langElement.textContent())?.trim();
-    console.log("✅ Detected current language:", currentLang);
-    return currentLang;
+      await this.updateLanguageLink.click();
+      console.log('✅ Clicked Update Language link');
+      break;
+    } catch (error) {
+      if (attempt === 2) {
+        await this.page.screenshot({ path: `screenshots/updateLanguageLink-failure-${Date.now()}.png`, fullPage: true });
+        throw new Error('❌ Failed to click Update Language link after retry — screenshot captured');
+      }
+      console.log('⚠️ Update Language link not ready — retrying...');
+      await this.page.waitForTimeout(1000);
+    }
   }
+
+  const langElement = this.page.locator('span.text-dots.float-left', {
+    hasText: /Amharic|English|Tigrinya|Oromiffa|Somali/
+  }).first();
+
+  await langElement.waitFor({ state: 'visible', timeout: 10000 });
+  const currentLang = (await langElement.textContent())?.trim();
+  console.log(`✅ Detected current language: ${currentLang}`);
+  return currentLang;
+}
 
 async uploadDocuments(filePath) {
   // Step 1: Open the document type dropdown

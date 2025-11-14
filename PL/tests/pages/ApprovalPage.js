@@ -22,23 +22,45 @@ export default class ApprovalPage {
     await this.page.getByRole('button', { name: 'Sign In' }).click();
   }
 
+
   async approve(msisdn, comment = 'Test approved') {
-    const popupPromise = this.page.waitForEvent('popup');
-    await this.page.getByText('CRMUI').click();
-    const crmPage = await popupPromise;
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      console.log(`🔁 Attempt ${attempt}: Starting approval flow for MSISDN ${msisdn}`);
 
-    await crmPage.getByText('Approvals').click();
-    await crmPage.getByRole('link', { name: 'Approval', exact: true }).click();
-    await crmPage.getByRole('cell', { name: msisdn }).first().click();
+      const popupPromise = this.page.waitForEvent('popup');
+      await this.page.getByText('CRMUI').click();
+      const crmPage = await popupPromise;
 
-    await crmPage.getByRole('button').filter({ hasText: /^$/ }).nth(2).click();
-    await crmPage.getByRole('button', { name: 'Self Assign' }).click();
-    await crmPage.getByRole('button', { name: 'Edit' }).click();
-    await crmPage.getByRole('button', { name: 'Approve' }).click();
+      // Guard against Keycloak redirect
+      if (await crmPage.getByRole('heading', { name: 'Keycloak' }).isVisible()) {
+        throw new Error('Redirected to Keycloak');
+      }
 
-    await crmPage.locator('#comment').fill(comment);
-    await crmPage.getByRole('button', { name: 'Submit' }).click();
+      await crmPage.getByText('Approvals').click();
+      await crmPage.getByRole('link', { name: 'Approval', exact: true }).click();
+      await crmPage.getByRole('cell', { name: msisdn }).first().click();
+      await crmPage.getByRole('button').filter({ hasText: /^$/ }).nth(2).click(); 
+      await crmPage.getByRole('button', { name: 'Self Assign' }).click();
+      await crmPage.getByRole('button', { name: 'Edit' }).click();
 
-    console.log(`✅ Approval completed for MSISDN ${msisdn}`);
+      const approveButton = crmPage.getByRole('button', { name: 'Approve' });
+      await approveButton.waitFor({ state: 'visible', timeout: 10000 });
+      await approveButton.click();
+
+      await crmPage.locator('#comment').fill(comment);
+      await crmPage.getByRole('button', { name: 'Submit' }).click();
+
+      console.log(`✅ Approval completed for MSISDN ${msisdn}`);
+      return;
+    } catch (error) {
+      if (attempt === 2) {
+        await this.page.screenshot({ path: `screenshots/approval-failure-${Date.now()}.png`, fullPage: true });
+        throw new Error(`❌ Approval failed for MSISDN ${msisdn} after retry — screenshot captured`);
+      }
+      console.log('⚠️ Approval flow failed — retrying after re-login...');
+      await this.relogin(); // implement re-login helper
+    }
   }
+}
 }
