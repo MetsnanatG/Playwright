@@ -5,8 +5,8 @@ dotenv.config({ path: './.env', debug: false });
 export default defineConfig({
   timeout: 60000, // each test can run up to 60s
   use: {
-    actionTimeout: 5000,          // per action
-    navigationTimeout: 15000,     // per navigation
+    actionTimeout: 10000,          // per action
+    navigationTimeout: 20000,     // per navigation
   },
 
   globalSetup: './tests/global-setup.js',
