@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import { testEnv } from '../../envConfig';
 
 export default class SearchMSISDNPage {
   constructor(page) {
@@ -32,7 +33,7 @@ export default class SearchMSISDNPage {
 
         console.log('⚠️ MSISDN input not ready — navigating back to CRM homepage...');
         console.log(`   └─ Current URL: ${this.page.url()}`);
-        await this.page.goto(process.env.CRM_BP_BASE_URL);
+        await this.page.goto(testEnv.crmUrl);
         await this.page.waitForLoadState('domcontentloaded');
         await this.page.waitForTimeout(1000); // brief pause before retry
       }

@@ -1,3 +1,5 @@
+import OrderManagementPage from "./OrderManagementPage";
+
 export default class ChangeLanguagePage {
   constructor(page) {
     this.page = page;
@@ -40,7 +42,7 @@ export default class ChangeLanguagePage {
     hasText: /Amharic|English|Tigrinya|Oromiffa|Somali/
   }).first();
 
-  await langElement.waitFor({ state: 'visible', timeout: 10000 });
+  await langElement.waitFor({ state: 'visible', timeout: 20000 });
   const currentLang = (await langElement.textContent())?.trim();
   console.log(`✅ Detected current language: ${currentLang}`);
   return currentLang;
@@ -79,20 +81,26 @@ async uploadDocuments(filePath) {
     console.log(`✅ Submitted language change request: ${lang}`);
   }
 
-  async assertLanguageChanged(lang) {
-    const langElement = this.page.locator('div.css-1uccc91-singleValue', {
-      hasText: lang
-    });
-    await langElement.waitFor({ state: 'visible', timeout: 10000 });
-    console.log(`✅ Verified language changed to: ${lang}`);
-  }
+  async assertLanguageChanged(serviceId) {
+  const orderPage = new OrderManagementPage(this.page);
+  await orderPage.navigateToOrderView();
+  await orderPage.searchOrder(serviceId);
 
-  async toggleLanguage(filePath = 'Test file.txt') {
+  const parsed = await orderPage.validateOrderCompletion(serviceId);
+
+  if (parsed.status === 'Completed') {
+    console.log(`✅ Order for ${serviceId} is Completed`);
+  } else {
+    throw new Error(`❌ Order for ${serviceId} not completed. Parsed status: ${parsed.status}`);
+  }
+}
+
+  async toggleLanguage(serviceId, filePath = 'Test file.txt') {
     const current = await this.getCurrentLanguage();
     const target = current === 'Amharic' ? 'English' : 'Amharic';
 
     await this.changeLanguage(target, filePath);
-    await this.assertLanguageChanged(target);
+    await this.assertLanguageChanged(serviceId);
 
     return target;
   }

@@ -34,12 +34,17 @@ export default class ApprovalPage {
         throw new Error('Redirected to Keycloak');
       }
 
+      // add wait here 
+      await crmPage.waitForLoadState('networkidle');
+
       await crmPage.getByText('Approvals').click();
       await crmPage.getByRole('link', { name: 'Approval', exact: true }).click();
       await crmPage.getByRole('cell', { name: msisdn }).first().click();
       await crmPage.getByRole('button').filter({ hasText: /^$/ }).nth(2).click(); 
       await crmPage.getByRole('button', { name: 'Self Assign' }).click();
       await crmPage.getByRole('button', { name: 'Edit' }).click();
+
+      await crmPage.waitForLoadState('networkidle');
 
       const approveButton = crmPage.getByRole('button', { name: 'Approve' });
       await approveButton.waitFor({ state: 'visible', timeout: 20000 });

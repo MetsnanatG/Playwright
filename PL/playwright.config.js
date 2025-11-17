@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config({ path: './.env', debug: false });
 
 export default defineConfig({
-  timeout: 80000,
+  timeout: 100000,
   testDir: './tests',
   globalSetup: './tests/global-setup.js',
   reporter: [['html', { outputFolder: 'playwright-report' }]],

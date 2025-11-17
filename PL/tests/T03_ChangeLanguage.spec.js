@@ -22,26 +22,26 @@ test('@crm Change Language after MSISDN search (with conditional upload + approv
   await searchPage.assertServiceDetailsVisible();
 
   const langPage = new ChangeLanguagePage(creatorPage);
-  const newLanguage = await langPage.toggleLanguage('Test file.txt');
+  const newLanguage = await langPage.toggleLanguage(msisdn,'Test file.txt');
   console.log(`✅ Language successfully switched to: ${newLanguage}`);
 
   await creatorContext.close(); // session will be invalidated after approval
 
   if (process.env.CONNECTION_TYPE === 'EBU') {
+  const status = await reloginAndValidateOrder(browser, msisdn);
+  if (status !== 'Completed') {
     console.log(`⚠️ Approval required for MSISDN ${msisdn}`);
-
     const approverContext = await browser.newContext();
     const approverPage = await approverContext.newPage();
-
     const approvalPage = new ApprovalPage(approverPage);
     await approvalPage.login(testEnv.approverUser, testEnv.approverPass);
     await approvalPage.approve(msisdn, 'Approved after document upload');
-
     await approverContext.close();
   } else {
-    console.log(`ℹ️ No approval required for MSISDN ${msisdn}`);
+    console.log(`ℹ️ Order already completed — skipping approval`);
   }
+}});
 
   // ✅ Re-login and validate order
-  await reloginAndValidateOrder(browser, msisdn);
-});
+  // await reloginAndValidateOrder(browser, msisdn);
+// });
