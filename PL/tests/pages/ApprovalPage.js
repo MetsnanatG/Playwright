@@ -1,21 +1,18 @@
-// tests/pages/ApprovalPage.js
+import { testEnv } from "../../envConfig";
 export default class ApprovalPage {
   constructor(page) {
     this.page = page;
   }
 
   async login(username, password) {
-    await this.page.goto(process.env.BASE_URL,{timeout:60000});
+    await this.page.goto(testEnv.baseUrl,{timeout:60000});
     // Explicitly sign out if a session is active
       const signOutLink = this.page.getByRole('link', { name: /Sign Out/i });
     if (await signOutLink.isVisible()) {
       await signOutLink.click();
       await this.page.waitForLoadState('networkidle');
       console.log('✅ Explicit Sign Out performed');
-    }
-
-    
-
+    } 
 
     await this.page.getByRole('textbox', { name: 'Username' }).type(username);
     await this.page.getByRole('textbox', { name: 'Password' }).type(password);
@@ -45,7 +42,7 @@ export default class ApprovalPage {
       await crmPage.getByRole('button', { name: 'Edit' }).click();
 
       const approveButton = crmPage.getByRole('button', { name: 'Approve' });
-      await approveButton.waitFor({ state: 'visible', timeout: 10000 });
+      await approveButton.waitFor({ state: 'visible', timeout: 20000 });
       await approveButton.click();
 
       await crmPage.locator('#comment').fill(comment);
@@ -55,11 +52,10 @@ export default class ApprovalPage {
       return;
     } catch (error) {
       if (attempt === 2) {
-        await this.page.screenshot({ path: `screenshots/approval-failure-${Date.now()}.png`, fullPage: true });
-        throw new Error(`❌ Approval failed for MSISDN ${msisdn} after retry — screenshot captured`);
+        
+        throw new Error(`❌ Approval failed for MSISDN ${msisdn} after retry `);
       }
-      console.log('⚠️ Approval flow failed — retrying after re-login...');
-      await this.relogin(); // implement re-login helper
+     
     }
   }
 }

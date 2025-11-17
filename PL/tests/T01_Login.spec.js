@@ -1,10 +1,12 @@
 import { test } from '@playwright/test';
 import CRMUIPage from './pages/CRMUIPage';
 import { loginAndOpenCRMUI } from './helpers/navigation';
+import { testEnv } from '../envConfig';
+
 
 test('login and open CRMUI', async ({ page }) => {
   const crmPage = await loginAndOpenCRMUI(page);
-  await crmPage.goto('https://bp-6dapps-sit.crm-bp.bss.blueprint.lab/crm-ui/home');
+  await crmPage.goto(testEnv.crmUrl);
 
   const crmUI = new CRMUIPage(crmPage);
   await crmUI.assertWelcomeMessage();

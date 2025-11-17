@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 test('@crm Validate Order Completion', async ({ page }) => {
-  await page.goto(process.env.CRM_BASE_URL);
+  // await page.goto(process.env.CRM_BP_BASE_URL);
 
   // ✅ No popup needed — you're already on CRM landing page
   const orderPage = new OrderManagementPage(page);

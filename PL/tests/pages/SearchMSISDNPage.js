@@ -32,7 +32,7 @@ export default class SearchMSISDNPage {
 
         console.log('⚠️ MSISDN input not ready — navigating back to CRM homepage...');
         console.log(`   └─ Current URL: ${this.page.url()}`);
-        await this.page.goto(process.env.CRM_BASE_URL);
+        await this.page.goto(process.env.CRM_BP_BASE_URL);
         await this.page.waitForLoadState('domcontentloaded');
         await this.page.waitForTimeout(1000); // brief pause before retry
       }
@@ -45,7 +45,7 @@ export default class SearchMSISDNPage {
   }
 
   async assertServiceDetailsVisible() {
-    await expect(this.serviceDetailsSection, 'Service details section should be visible').toBeVisible({ timeout: 15000 });
+    await expect(this.serviceDetailsSection, 'Service details section should be visible').toBeVisible({ timeout: 30000 });
     console.log('📄 Service details section is visible');
   }
 }

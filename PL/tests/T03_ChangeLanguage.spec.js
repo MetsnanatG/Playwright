@@ -4,16 +4,17 @@ dotenv.config();
 
 import SearchMSISDNPage from './pages/SearchMSISDNPage';
 import ChangeLanguagePage from './pages/ChangeLanguagePage';
-import ApprovalPage from './pages/approvalPage';
+import ApprovalPage from './pages/ApprovalPage';
 import { reloginAndValidateOrder } from './helpers/reloginAndValidateOrder';
+import { testEnv } from '../envConfig';
 
 test('@crm Change Language after MSISDN search (with conditional upload + approval)', async ({ browser }) => {
-  const msisdn = process.env.BP_EBU_MSISDN;
+  const msisdn = testEnv.msisdn;
 
   const creatorContext = await browser.newContext();
   const creatorPage = await creatorContext.newPage();
 
-  await creatorPage.goto(process.env.CRM_BASE_URL);
+  await creatorPage.goto(testEnv.crmUrl);
   await creatorPage.waitForLoadState('networkidle');
 
   const searchPage = new SearchMSISDNPage(creatorPage);
@@ -33,7 +34,7 @@ test('@crm Change Language after MSISDN search (with conditional upload + approv
     const approverPage = await approverContext.newPage();
 
     const approvalPage = new ApprovalPage(approverPage);
-    await approvalPage.login(process.env.APPROVER_USER, process.env.APPROVER_PASS);
+    await approvalPage.login(testEnv.approverUser, testEnv.approverPass);
     await approvalPage.approve(msisdn, 'Approved after document upload');
 
     await approverContext.close();
